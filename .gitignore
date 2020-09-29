@@ -1,0 +1,6 @@
+node_modules
+coverage
+.env
+default.json
+test.json
+.DS_Store
