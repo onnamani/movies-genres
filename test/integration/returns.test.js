@@ -1,10 +1,11 @@
 const request = require('supertest')
 const { Rental } = require('../../models/rentalModel')
+const { User } = require('../../models/userModel')
 const mongoose = require('mongoose')
 
 jest.setTimeout(30000)
 
-describe('/api/returns', () => {
+describe('POST /api/returns', () => {
   let server;
   let customerId
   let movieId
@@ -15,7 +16,7 @@ describe('/api/returns', () => {
 
     customerId = mongoose.Types.ObjectId()
     movieId = mongoose.Types.ObjectId()
-
+        
     rental = new Rental({
       customer: {
         _id: customerId,
@@ -44,5 +45,16 @@ describe('/api/returns', () => {
       .send({ customerId, movieId })
 
     expect(res.status).toBe(401)
+  })
+
+  // Return 400 if customerId is not provided
+  it('should return 400 if customerId is not provided', async () => {
+    const token = new User().generateAuthToken()
+    const res = await request(server)
+      .post('/api/returns')
+      .set('x-auth-token', token)
+      .send({ movieId })
+    
+    expect(res.status).toBe(400)
   })
 })
