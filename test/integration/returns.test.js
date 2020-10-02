@@ -83,4 +83,13 @@ describe('POST /api/returns', () => {
 
     expect(res.status).toBe(404)
   })
+
+  // Return 400 if return already processed
+  it('should return 400 if return already processed', async () => {
+    await Rental.findByIdAndUpdate(rental._id, {dateReturned: Date.now()})
+
+    const res = await exec()
+
+    expect(res.status).toBe(400)
+  })
 })
