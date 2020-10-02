@@ -4,3 +4,5 @@ coverage
 default.json
 test.json
 .DS_Store
+logfile.log
+uncaughtExceptions.log

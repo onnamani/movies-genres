@@ -74,4 +74,13 @@ describe('POST /api/returns', () => {
 
     expect(res.status).toBe(400)
   })
+
+  // Return 404 if no rental found for customer/movie combination
+  it('should return 404 if no rental found for customer/movie', async () => {
+    await Rental.deleteMany({})
+
+    const res = await exec()
+
+    expect(res.status).toBe(404)
+  })
 })
