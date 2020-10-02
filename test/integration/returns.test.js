@@ -92,4 +92,12 @@ describe('POST /api/returns', () => {
 
     expect(res.status).toBe(400)
   })
+
+  // Return 200 if valid request
+  it('should return 200 if valid request', async () => {
+   
+    const res = await exec()
+
+    expect(res.status).toBe(200)
+  })
 })
