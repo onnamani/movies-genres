@@ -57,4 +57,13 @@ describe('POST /api/returns', () => {
     
     expect(res.status).toBe(400)
   })
+
+  // Return 400 if movieId is not provided
+  it('should return 400 if movieId is not provided', async() => {
+    const token = new User().generateAuthToken()
+    const res = await request(server)
+      .post('/api/returns/')
+      .set('x-auth-token', token)
+      .send({ customerId })
+  })
 })
