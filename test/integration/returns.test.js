@@ -2,6 +2,7 @@ const request = require('supertest')
 const { Rental } = require('../../models/rentalModel')
 const mongoose = require('mongoose')
 
+jest.setTimeout(30000)
 
 describe('/api/returns', () => {
   let server;
@@ -32,8 +33,8 @@ describe('/api/returns', () => {
   })
 
   afterEach(async () => {
-    server.close()
     await Rental.deleteMany({})
+    await server.close()
   })
 
   //Return 401 if client is not logged in
