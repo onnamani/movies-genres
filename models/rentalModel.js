@@ -1,28 +1,27 @@
 const Joi = require('joi')
-
 const mongoose = require('mongoose')
 
-const Rentals = mongoose.model("Rental", new mongoose.Schema({
+const rentalSchema = new mongoose.Schema({
   customer: {
     type: new mongoose.Schema({
       name: {
         type: String,
         required: true,
         minlength: 5,
-        maxlength: 50
+        maxlength: 50,
       },
       isGold: {
         type: Boolean,
-        default: false
+        default: false,
       },
       phone: {
         type: String,
         required: true,
         minlength: 5,
-        maxlength: 50
-      }
+        maxlength: 50,
+      },
     }),
-    required: true
+    required: true,
   },
   movie: {
     type: new mongoose.Schema({
@@ -31,30 +30,39 @@ const Rentals = mongoose.model("Rental", new mongoose.Schema({
         required: true,
         trim: true,
         minlength: 5,
-        maxlength: 255
+        maxlength: 255,
       },
       dailyRentalRate: {
         type: Number,
         required: true,
         min: 0,
-        max: 255
-      }
+        max: 255,
+      },
     }),
-    required: true
+    required: true,
   },
   dateOut: {
     type: Date,
     required: true,
-    default: Date.now
+    default: Date.now,
   },
   dateReturned: {
-    type: Date
+    type: Date,
   },
   rentalFee: {
     type: Number,
-    min: 0
-  }
-}))
+    min: 0,
+  },
+});
+
+rentalSchema.statics.lookup = function(customerId, movieId) {
+  return this.findOne({
+    'customer._id': customerId,
+    'movie._id': movieId
+  })
+}
+
+const Rentals = mongoose.model("Rental", rentalSchema)
 
 function validateRental(rental) {
   const schema = {
