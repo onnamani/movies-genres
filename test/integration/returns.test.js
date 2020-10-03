@@ -2,6 +2,7 @@ const moment = require('moment')
 const request = require("supertest");
 const { Rental } = require("../../models/rentalModel");
 const { User } = require("../../models/userModel");
+const { Movies } = require('../../models/movieModel')
 const mongoose = require("mongoose");
 
 jest.setTimeout(30000);
@@ -10,6 +11,7 @@ describe("POST /api/returns", () => {
   let server;
   let customerId;
   let movieId;
+  let movie;
   let rental;
   let token;
 
@@ -26,6 +28,15 @@ describe("POST /api/returns", () => {
     customerId = mongoose.Types.ObjectId();
     movieId = mongoose.Types.ObjectId();
     token = new User().generateAuthToken();
+
+    movie = new Movies({
+      _id: movieId,
+      title: "Terminator",
+      dailyRentalRate: 2,
+      genre: { name: 'Action' },
+      numberInStock: 10
+    })
+    await movie.save()
 
     rental = new Rental({
       customer: {
@@ -45,6 +56,7 @@ describe("POST /api/returns", () => {
 
   afterEach(async () => {
     await Rental.deleteMany({});
+    await Movies.deleteMany({})
     await server.close();
   });
 
@@ -120,5 +132,13 @@ describe("POST /api/returns", () => {
     const rentalInDb = await Rental.findById(rental._id);
     
     expect(rentalInDb.rentalFee).toBe(14)
+  });
+
+  // Increase the movie stock
+  it("should increase the movie stock if input is valid", async () => {
+    await exec();
+
+    const movieInDb = await Movies.findById(movieId);
+    expect(movieInDb.numberInStock).toBe(movie.numberInStock + 1)
   });
 });
