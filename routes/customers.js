@@ -1,5 +1,6 @@
 const { Customer, validate } = require('../models/customerModel')
 const asyncMiddleware = require('../middleware/async')
+const authMiddleware = require('../middleware/authMiddleware')
 const express = require("express");
 const validateMiddleware = require('../middleware/validateMiddleware');
 const validateObjectId = require('../middleware/validateObjectId')
@@ -12,7 +13,7 @@ router.get("/", asyncMiddleware(async (req, res) => {
   res.send(customers)    
 }));
 
-router.post("/", (req, res) => {
+router.post("/", authMiddleware, (req, res) => {
   const { error, value } = validate(req.body);
   if (error) return res.status(400).send(error.details[0].message);
 

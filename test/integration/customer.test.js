@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const request = require('supertest')
 const { Customer } = require('../../models/customerModel')
+const { User } = require('../../models/userModel')
 
 jest.setTimeout(30000)
 
@@ -57,5 +58,17 @@ describe('/api/customers', () => {
       expect(res.body).toHaveProperty('name', customer.name)
     })
   
+  })
+
+  describe('POST /', () => {
+    it('should return 401 if user is not logged on', async () => {
+      const customer = new Customer({ name: "Obinna Nnamani", phone: "0817000000" })
+
+      const res = await request(server)
+        .post('/api/customers/')
+        .send(customer)
+
+      expect(res.status).toBe(401)
+    })
   })
 })
