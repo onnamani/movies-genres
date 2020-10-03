@@ -114,5 +114,19 @@ describe('/api/customers', () => {
             
       expect(customerInDb[0]).toHaveProperty('isGold')
     })
+
+    it('should return the customer', async () => {
+      const token = new User().generateAuthToken()
+
+      const customer = { name: "Obinna Nnamani", phone: "0817000000" };
+      
+      const res = await request(server)
+        .post('/api/customers/')
+        .set('x-auth-token', token)
+        .send(customer)
+
+      expect(res.body).toHaveProperty('isGold')
+      expect(res.body).toHaveProperty("_id")
+    })
   })
 })
