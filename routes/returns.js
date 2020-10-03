@@ -20,7 +20,7 @@ router.post('/', [auth, validateMiddleware(validate)], async (req, res) => {
     $inc: { numberInStock: 1 }
   })
   
-  return res.status(200).send(rental)
+  return res.send(rental)
 })
 
 function validate(req) {
