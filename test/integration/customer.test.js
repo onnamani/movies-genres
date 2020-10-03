@@ -61,54 +61,51 @@ describe('/api/customers', () => {
   })
 
   describe('POST /', () => {
-    it('should return 401 if user is not logged on', async () => {
-      const customer = { name: "Obinna Nnamani", phone: "0817000000" }
+    let token
+    let customer
 
-      const res = await request(server)
+    const exec = () => {
+      return request(server)
         .post('/api/customers/')
+        .set('x-auth-token', token)
         .send(customer)
+    }
+
+    beforeEach(() => {
+      token = new User().generateAuthToken()
+      customer = { name: "Obinna Nnamani", phone: "0817000000" }
+    })
+
+    it('should return 401 if user is not logged on', async () => {
+      token = ""
+
+      const res = await exec()
 
       expect(res.status).toBe(401)
     })
 
     it('should return 400 if customer name/phone is less than 5 charachters', async () => {
-      const token = new User().generateAuthToken()
-
-      const customer = { name: "1234", phone: "1234" }
+      customer = { name: "1234", phone: "1234" }
       
-      const res = await request(server)
-        .post('/api/customers/')
-        .set('x-auth-token', token)
-        .send(customer)
+      const res = await exec()
       
       expect(res.status).toBe(400)
     })
 
     it('should return 400 if customer name/phone is more than 50 charachters', async () => {
-      const token = new User().generateAuthToken()
-
       const name = new Array(52).join('a')
       const phone = new Array(52).join('1')
 
-      const customer = { name, phone }
+      customer = { name, phone }
       
-      const res = await request(server)
-        .post('/api/customers/')
-        .set('x-auth-token', token)
-        .send(customer)
+      const res = await exec()
       
       expect(res.status).toBe(400)
     })
 
     it('should save the customer if valid', async () => {
-      const token = new User().generateAuthToken()
-
-      const customer = { name: "Obinna Nnamani", phone: "0817000000" };
       
-      await request(server)
-        .post('/api/customers/')
-        .set('x-auth-token', token)
-        .send(customer)
+      await exec()
       
       const customerInDb = await Customer.find({ name: "Obinna Nnamani" })
             
@@ -116,14 +113,7 @@ describe('/api/customers', () => {
     })
 
     it('should return the customer', async () => {
-      const token = new User().generateAuthToken()
-
-      const customer = { name: "Obinna Nnamani", phone: "0817000000" };
-      
-      const res = await request(server)
-        .post('/api/customers/')
-        .set('x-auth-token', token)
-        .send(customer)
+      const res = await exec()
 
       expect(res.body).toHaveProperty('isGold')
       expect(res.body).toHaveProperty("_id")
