@@ -3,6 +3,7 @@ const adminMiddleware = require("../middleware/adminMiddleware");
 const asyncMiddleware = require('../middleware/async')
 const authMiddleware = require("../middleware/authMiddleware");
 const { Genre, validate } = require("../models/genreModel");
+const validateMiddleware = require('../middleware/validateMiddleware')
 const express = require("express");
 const mongoose = require('mongoose')
 const router = express.Router();
@@ -14,10 +15,8 @@ router.get("/", asyncMiddleware(async (req, res) => {
   res.send(genres);
 }));
 
-router.post("/", authMiddleware, (req, res) => {
-  const { error } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-
+router.post("/", [authMiddleware, validateMiddleware(validate)], (req, res) => {
+  
   const genre = new Genre({
     name: req.body.name,
   });
@@ -27,10 +26,9 @@ router.post("/", authMiddleware, (req, res) => {
     .then((document) => res.send(document))
 });
 
-router.put("/:id", authMiddleware, asyncMiddleware(async (req, res) => {
-  const { error } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-
+router.put("/:id", [authMiddleware, validateMiddleware(validate)], 
+asyncMiddleware(async (req, res) => {
+  
   const genre = await Genre.findByIdAndUpdate(
     req.params.id,
     { name: req.body.name },
