@@ -70,5 +70,18 @@ describe('/api/customers', () => {
 
       expect(res.status).toBe(401)
     })
+
+    it('should return 400 if customer name/phone is less than 5 charachters', async () => {
+      const token = new User().generateAuthToken()
+
+      const customer = new Customer({ name: "1234", phone: "1234" })
+      
+      const res = await request(server)
+        .post('/api/customers/')
+        .set('x-auth-token', token)
+        .send(customer)
+      
+      expect(res.status).toBe(400)
+    })
   })
 })
