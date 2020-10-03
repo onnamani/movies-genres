@@ -7,7 +7,7 @@ router.post('/', auth, async (req, res) => {
   if (!req.body.customerId) return res.status(400).send('customerId not found')
   if (!req.body.movieId) return res.status(400).send('movieId not found')
 
-  const rental = await Rental.findOne({
+  let rental = await Rental.findOne({
     'customer._id': req.body.customerId,
     'movie._id': req.body.movieId
   })
@@ -15,7 +15,9 @@ router.post('/', auth, async (req, res) => {
 
   if(rental.dateReturned) return res.status(400).send('Rental already processed')
 
-  return res.status(200).send()
+  rental.dateReturned = new Date()
+  rental = await rental.save()
+  return res.status(200).send(rental)
 })
 
 module.exports = router

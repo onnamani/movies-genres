@@ -1,103 +1,111 @@
-const request = require('supertest')
-const { Rental } = require('../../models/rentalModel')
-const { User } = require('../../models/userModel')
-const mongoose = require('mongoose')
+const request = require("supertest");
+const { Rental } = require("../../models/rentalModel");
+const { User } = require("../../models/userModel");
+const mongoose = require("mongoose");
 
-jest.setTimeout(30000)
+jest.setTimeout(30000);
 
-describe('POST /api/returns', () => {
+describe("POST /api/returns", () => {
   let server;
-  let customerId
-  let movieId
-  let rental
-  let token
+  let customerId;
+  let movieId;
+  let rental;
+  let token;
 
   const exec = () => {
     return request(server)
-      .post('/api/returns')
-      .set('x-auth-token', token)
-      .send({ customerId, movieId })
-  }
+      .post("/api/returns")
+      .set("x-auth-token", token)
+      .send({ customerId, movieId });
+  };
 
   beforeEach(async () => {
-    server = require('../../index')
+    server = require("../../index");
 
-    customerId = mongoose.Types.ObjectId()
-    movieId = mongoose.Types.ObjectId()
-    token = new User().generateAuthToken()
-        
+    customerId = mongoose.Types.ObjectId();
+    movieId = mongoose.Types.ObjectId();
+    token = new User().generateAuthToken();
+
     rental = new Rental({
       customer: {
         _id: customerId,
-        name: 'Obinna Nnamani',
-        phone: '08030000000'
+        name: "Obinna Nnamani",
+        phone: "08030000000",
       },
       movie: {
         _id: movieId,
-        title: 'Terminator',
-        dailyRentalRate: 2
-      }
-    })
+        title: "Terminator",
+        dailyRentalRate: 2,
+      },
+    });
 
-    await rental.save()
-  })
+    await rental.save();
+  });
 
   afterEach(async () => {
-    await Rental.deleteMany({})
-    await server.close()
-  })
+    await Rental.deleteMany({});
+    await server.close();
+  });
 
   //Return 401 if client is not logged in
-  it('should return 401 if client is not logged in', async () => {
-    token = ''
+  it("should return 401 if client is not logged in", async () => {
+    token = "";
 
-    const res = await exec()
+    const res = await exec();
 
-    expect(res.status).toBe(401)
-  })
+    expect(res.status).toBe(401);
+  });
 
   // Return 400 if customerId is not provided
-  it('should return 400 if customerId is not provided', async () => {
-    customerId = '' 
+  it("should return 400 if customerId is not provided", async () => {
+    customerId = "";
 
-    const res = await exec()
-    
-    
-    expect(res.status).toBe(400)
-  })
+    const res = await exec();
+
+    expect(res.status).toBe(400);
+  });
 
   // Return 400 if movieId is not provided
-  it('should return 400 if movieId is not provided', async() => {
-    movieId = ''
+  it("should return 400 if movieId is not provided", async () => {
+    movieId = "";
 
-    const res = await exec()
+    const res = await exec();
 
-    expect(res.status).toBe(400)
-  })
+    expect(res.status).toBe(400);
+  });
 
   // Return 404 if no rental found for customer/movie combination
-  it('should return 404 if no rental found for customer/movie', async () => {
-    await Rental.deleteMany({})
+  it("should return 404 if no rental found for customer/movie", async () => {
+    await Rental.deleteMany({});
 
-    const res = await exec()
+    const res = await exec();
 
-    expect(res.status).toBe(404)
-  })
+    expect(res.status).toBe(404);
+  });
 
   // Return 400 if return already processed
-  it('should return 400 if return already processed', async () => {
-    await Rental.findByIdAndUpdate(rental._id, {dateReturned: Date.now()})
+  it("should return 400 if return already processed", async () => {
+    await Rental.findByIdAndUpdate(rental._id, { dateReturned: Date.now() });
 
-    const res = await exec()
+    const res = await exec();
 
-    expect(res.status).toBe(400)
-  })
+    expect(res.status).toBe(400);
+  });
 
   // Return 200 if valid request
-  it('should return 200 if valid request', async () => {
-   
-    const res = await exec()
+  it("should return 200 if valid request", async () => {
+    const res = await exec();
 
-    expect(res.status).toBe(200)
-  })
-})
+    expect(res.status).toBe(200);
+  });
+
+  // Set the return date
+  it("should set the return date if input is valid", async () => {
+    await exec();
+
+    const rentalInDb = await Rental.findById(rental._id);
+    const diff = new Date() - rentalInDb.dateReturned;
+
+    expect(diff).toBeLessThan(5 * 1000);
+  });
+});
