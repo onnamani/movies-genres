@@ -83,5 +83,21 @@ describe('/api/customers', () => {
       
       expect(res.status).toBe(400)
     })
+
+    it('should return 400 if customer name/phone is more than 50 charachters', async () => {
+      const token = new User().generateAuthToken()
+
+      const name = new Array(52).join('a')
+      const phone = new Array(52).join('1')
+
+      const customer = new Customer({ name, phone })
+      
+      const res = await request(server)
+        .post('/api/customers/')
+        .set('x-auth-token', token)
+        .send(customer)
+      
+      expect(res.status).toBe(400)
+    })
   })
 })
