@@ -47,7 +47,7 @@ describe("/api/genres", () => {
     it("should return a 404 if invalid id is passed", async () => {
       const res = await request(server).get("/api/genres/1");
 
-      expect(res.status).toBe(404);
+      expect(res.status).toBe(400);
     });
   });
 
