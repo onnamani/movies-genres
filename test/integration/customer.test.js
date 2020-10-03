@@ -38,6 +38,14 @@ describe('/api/customers', () => {
       
       expect(res.status).toBe(400)
     })
+
+    it('should return 404 if customer with given id is not found', async () => {
+      const customer = new Customer({ name: 'Obinna Nnamani', phone: "0817000000" })
+      
+      const res = await request(server).get('/api/customers/' + customer._id)
+
+      expect(res.status).toBe(404)
+    })
     
     it('should return a customer if customer id is valid', async () => {
       const customer = new Customer({ name: 'Obinna Nnamani', phone: "08170000000" })
