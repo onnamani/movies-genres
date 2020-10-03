@@ -1,4 +1,3 @@
-const moment = require('moment')
 const Joi = require('joi')
 const { Rental } = require('../models/rentalModel')
 const { Movies } = require('../models/movieModel')
@@ -14,9 +13,7 @@ router.post('/', [auth, validateMiddleware(validate)], async (req, res) => {
 
   if(rental.dateReturned) return res.status(400).send('Rental already processed')
 
-  rental.dateReturned = new Date()
-  const rentalDays = moment().diff(rental.dateOut, 'days')
-  rental.rentalFee = rentalDays * rental.movie.dailyRentalRate
+  rental.return()  
   await rental.save()
 
   await Movies.updateOne({ _id: rental.movie._id}, {
