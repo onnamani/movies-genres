@@ -1,15 +1,16 @@
 const { Customer, validate } = require('../models/customerModel')
+const asyncMiddleware = require('../middleware/async')
 const express = require("express");
+const validateMiddleware = require('../middleware/validateMiddleware');
+const validateObjectId = require('../middleware/validateObjectId')
 const router = express.Router();
 
 
 
-router.get("/", (req, res) => {
-  Customer.find()
-    .sort({ name: 1 })
-    .then((document) => res.send(document))
-    .catch((err) => res.send(err.message));
-});
+router.get("/", asyncMiddleware(async (req, res) => {
+  const customers = await Customer.find().sort({ name: 1 })
+  res.send(customers)    
+}));
 
 router.post("/", (req, res) => {
   const { error, value } = validate(req.body);
@@ -49,13 +50,12 @@ router.put("/:id", (req, res) => {
     .catch((err) => res.send(err.message));
 });
 
-router.get('/:id', (req, res) => {
+router.get('/:id', validateObjectId, (req, res) => {
   Customer.findById(req.params.id)
     .then(document => {
       if (!document) return res.status(404).send("The Customer with the given ID was not found.")
       res.send(document)
     })
-    .catch(err => res.send(err.message))
 })
 
 router.delete('/:id', (req, res) => {
