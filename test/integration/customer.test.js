@@ -62,7 +62,7 @@ describe('/api/customers', () => {
 
   describe('POST /', () => {
     it('should return 401 if user is not logged on', async () => {
-      const customer = new Customer({ name: "Obinna Nnamani", phone: "0817000000" })
+      const customer = { name: "Obinna Nnamani", phone: "0817000000" }
 
       const res = await request(server)
         .post('/api/customers/')
@@ -74,7 +74,7 @@ describe('/api/customers', () => {
     it('should return 400 if customer name/phone is less than 5 charachters', async () => {
       const token = new User().generateAuthToken()
 
-      const customer = new Customer({ name: "1234", phone: "1234" })
+      const customer = { name: "1234", phone: "1234" }
       
       const res = await request(server)
         .post('/api/customers/')
@@ -90,7 +90,7 @@ describe('/api/customers', () => {
       const name = new Array(52).join('a')
       const phone = new Array(52).join('1')
 
-      const customer = new Customer({ name, phone })
+      const customer = { name, phone }
       
       const res = await request(server)
         .post('/api/customers/')
@@ -98,6 +98,21 @@ describe('/api/customers', () => {
         .send(customer)
       
       expect(res.status).toBe(400)
+    })
+
+    it('should save the customer if valid', async () => {
+      const token = new User().generateAuthToken()
+
+      const customer = { name: "Obinna Nnamani", phone: "0817000000" };
+      
+      await request(server)
+        .post('/api/customers/')
+        .set('x-auth-token', token)
+        .send(customer)
+      
+      const customerInDb = await Customer.find({ name: "Obinna Nnamani" })
+            
+      expect(customerInDb[0]).toHaveProperty('isGold')
     })
   })
 })

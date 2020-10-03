@@ -26,7 +26,6 @@ router.post("/", authMiddleware, (req, res) => {
   customer
     .save()
     .then((document) => res.send(document))
-    .catch((err) => res.send(err.message));
 });
 
 router.put("/:id", (req, res) => {
