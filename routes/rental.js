@@ -1,6 +1,10 @@
 const { Rental: Rentals, validate } = require("../models/rentalModel");
 const { Customer } = require("../models/customerModel");
 const { Movies } = require("../models/movieModel");
+const asyncMiddleware = require('../middleware/async')
+const authMiddleware = require('../middleware/authMiddleware')
+const validateMiddleware = require('../middleware/validateMiddleware')
+const validateObjectId = require('../middleware/validateObjectId')
 const mongoose = require("mongoose");
 const Fawn = require("fawn");
 const express = require("express");
@@ -8,15 +12,13 @@ const router = express.Router();
 
 Fawn.init(mongoose);
 
-router.get("/", async (req, res) => {
+router.get("/", asyncMiddleware(async (req, res) => {
   const rentals = await Rentals.find().sort("customer");
   res.send(rentals);
-});
+}));
 
-router.post("/", async (req, res) => {
-  const { error } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-
+router.post("/", [authMiddleware, validateMiddleware(validate)], 
+async (req, res) => {  
   try {
     const customer = await Customer.findById(req.body.customerId);
     if (!customer) return res.status(400).send("Customer does not exist");
