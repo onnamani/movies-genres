@@ -58,7 +58,7 @@ describe("/api/rentals", () => {
       customer = new Customer({ name: 'Obinna Nnamani', phone: '0817000000' })
       movie = new Movies({ 
         title: 'Game of Thrones', 
-        genre: genre.name, 
+        genre: { id: genre._id, name: genre.name }, 
         numberInStock: 10,
         dailyRentalRate: 5 
       })
@@ -79,6 +79,7 @@ describe("/api/rentals", () => {
 
     afterEach(async () => {
       await Customer.deleteMany({})
+      await Movies.deleteMany({})
     })
     
     it("should return 404 if customer is not found", async () => {
@@ -92,6 +93,19 @@ describe("/api/rentals", () => {
 
     it("should return 404 if movie is not found", async () => {
       await customer.save()
+      const res = await request(server)
+        .post('/api/rentals/')
+        .set('x-auth-token', token)
+        .send({customerId: customer._id, movieId: movie._id})
+
+      expect(res.status).toBe(404)
+    });
+
+    it("should return 404 if number of movie in stock is zero", async () => {
+      await customer.save()
+      movie.numberInStock = 0
+      await movie.save()
+
       const res = await request(server)
         .post('/api/rentals/')
         .set('x-auth-token', token)
