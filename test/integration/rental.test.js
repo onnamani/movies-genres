@@ -51,6 +51,13 @@ describe("/api/rentals", () => {
     let token
     let genre
 
+    const exec = () => {
+      return request(server)
+        .post('/api/rentals/')
+        .set('x-auth-token', token)
+        .send({customerId: customer._id, movieId: movie._id})
+    }
+
     beforeEach(async () => {
       token = new User().generateAuthToken()
       genre = new Genre({ name: "Action" })
@@ -69,20 +76,17 @@ describe("/api/rentals", () => {
     })
     
     it("should return 404 if customer is not found", async () => {
-      const res = await request(server)
-        .post('/api/rentals/')
-        .set('x-auth-token', token)
-        .send({customerId: customer._id, movieId: movie._id})
+      await movie.save()
+      
+      const res = await exec()
 
       expect(res.status).toBe(404)
     });
 
     it("should return 404 if movie is not found", async () => {
       await customer.save()
-      const res = await request(server)
-        .post('/api/rentals/')
-        .set('x-auth-token', token)
-        .send({customerId: customer._id, movieId: movie._id})
+
+      const res = await exec()
 
       expect(res.status).toBe(404)
     });
@@ -92,10 +96,7 @@ describe("/api/rentals", () => {
       movie.numberInStock = 0
       await movie.save()
 
-      const res = await request(server)
-        .post('/api/rentals/')
-        .set('x-auth-token', token)
-        .send({customerId: customer._id, movieId: movie._id})
+      const res = await exec()
 
       expect(res.status).toBe(404)
     });
@@ -104,10 +105,7 @@ describe("/api/rentals", () => {
       await customer.save()      
       await movie.save()
 
-      const res = await request(server)
-        .post('/api/rentals/')
-        .set('x-auth-token', token)
-        .send({customerId: customer._id, movieId: movie._id})
+      const res = await exec()
       
       const movieInDb = await Movies.findById(movie._id)
 
