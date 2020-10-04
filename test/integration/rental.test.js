@@ -10,11 +10,11 @@ jest.setTimeout(30000);
 describe("/api/rentals", () => {
   let server;
 
-  beforeEach(() => {
+  beforeAll(() => {
     server = require("../../index");
   });
 
-  afterEach(async () => {
+  afterAll(async () => {
     await Rental.deleteMany({});
     await server.close();
   });
@@ -48,7 +48,6 @@ describe("/api/rentals", () => {
   describe("POST /", () => {
     let customer
     let movie
-    let rental
     let token
     let genre
 
@@ -61,20 +60,7 @@ describe("/api/rentals", () => {
         genre: { id: genre._id, name: genre.name }, 
         numberInStock: 10,
         dailyRentalRate: 5 
-      })
-      rental = new Rental({
-        customer: {
-          _id: customer._id,
-          name: customer.name,
-          isGold: customer.isGold,
-          phone: customer.phone
-        },
-        movie: {
-          _id: movie._id,
-          title: movie.title,
-          dailyRentalRate: movie.dailyRentalRate
-        }
-      })      
+      })     
     })
 
     afterEach(async () => {
@@ -112,6 +98,23 @@ describe("/api/rentals", () => {
         .send({customerId: customer._id, movieId: movie._id})
 
       expect(res.status).toBe(404)
+    });
+
+    it("should return a rental and update movies", async () => {
+      await customer.save()      
+      await movie.save()
+
+      const res = await request(server)
+        .post('/api/rentals/')
+        .set('x-auth-token', token)
+        .send({customerId: customer._id, movieId: movie._id})
+      
+      const movieInDb = await Movies.findById(movie._id)
+
+      expect(res.status).toBe(200)
+      expect(res.body.ops[0]).toHaveProperty('dateOut')
+      expect(res.body.ops[0]).toHaveProperty('_id')
+      expect(movieInDb.numberInStock).toBe(movie.numberInStock - 1)
     });
   });
 });
