@@ -30,7 +30,12 @@ describe('/api/rentals', () => {
   
       const res = await request(server).get('/api/rentals')
   
-      expect(res.status).toBe(200)      
+      expect(res.status).toBe(200)
+      expect(res.body.length).toBe(2)
+      expect(res.body.some(item => item.customer.name === "Obinna Nnamani"))
+        .toBeTruthy()      
+      expect(res.body.some(item => item.movie.title === "Distraction"))
+        .toBeTruthy()      
     })
   })
 })
