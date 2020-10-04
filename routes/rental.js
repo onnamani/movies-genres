@@ -21,13 +21,13 @@ router.post("/", [authMiddleware, validateMiddleware(validate)],
 async (req, res) => {  
   try {
     const customer = await Customer.findById(req.body.customerId);
-    if (!customer) return res.status(400).send("Customer does not exist");
+    if (!customer) return res.status(404).send("Customer does not exist");
 
     const movie = await Movies.findById(req.body.movieId);
-    if (!movie) return res.status(400).send("Movie does not exist");
+    if (!movie) return res.status(404).send("Movie does not exist");
 
     if (movie.numberInStock === 0)
-      return res.status(400).send("Movie not available");
+      return res.status(404).send("Movie not available");
 
     let rental = new Rentals({
       customer: {
