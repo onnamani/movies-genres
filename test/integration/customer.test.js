@@ -118,5 +118,19 @@ describe('/api/customers', () => {
       expect(res.body).toHaveProperty('isGold')
       expect(res.body).toHaveProperty("_id")
     })
-  })
+  })  
+
+  describe("PUT /:id", () => {
+    it("should return 404 if customer is not found", async () => {
+      const token = new User().generateAuthToken();
+      const customerId = mongoose.Types.ObjectId().toHexString();
+
+      const res = await request(server)
+        .put("/api/customers/" + customerId)
+        .set("x-auth-token", token)
+        .send({ name: "Obinna", phone: "0807000000", isGold: true });
+
+      expect(res.status).toBe(404);
+    });
+  });
 })
