@@ -166,5 +166,27 @@ describe('/api/customers', () => {
       
       expect(res.status).toBe(404)
     })
+
+    it('should delete customer', async () => {
+      const user = new User({
+        _id: mongoose.Types.ObjectId(),
+        isAdmin: true
+      })
+
+      const token = user.generateAuthToken()
+
+      const customer = new Customer({
+        name: "Obinna Nnamani",
+        phone: "0817000000"
+      })
+      await customer.save()
+
+      const res = await request(server)
+        .delete('/api/customers/' + customer._id)
+        .set('x-auth-token', token)
+      
+      expect(res.status).toBe(200)
+      expect(res.body).toHaveProperty("isGold", false)
+    })
   })
 })
