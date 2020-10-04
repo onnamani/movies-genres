@@ -13,10 +13,8 @@ router.get("/", asyncMiddleware(async (req, res) => {
   res.send(customers)    
 }));
 
-router.post("/", authMiddleware, (req, res) => {
-  const { error, value } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-
+router.post("/", [authMiddleware, validateMiddleware(validate)], (req, res) => {
+  
   const customer = new Customer({
     isGold: req.body.isGold,
     name: req.body.name,
@@ -28,10 +26,7 @@ router.post("/", authMiddleware, (req, res) => {
     .then((document) => res.send(document))
 });
 
-router.put("/:id", (req, res) => {
-  const { error, value } = validate(req.body);
-  if (error) return res.status(400).send(error.details[0].message);
-
+router.put("/:id", [authMiddleware, validateObjectId, validateMiddleware(validate)], (req, res) => {  
   Customer.findByIdAndUpdate(
     { _id: req.params.id },
     {
@@ -47,7 +42,6 @@ router.put("/:id", (req, res) => {
       if (!document)return res.status(404).send("The Customer with the given ID was not found.");
       res.send(document);
     })
-    .catch((err) => res.send(err.message));
 });
 
 router.get('/:id', validateObjectId, (req, res) => {
