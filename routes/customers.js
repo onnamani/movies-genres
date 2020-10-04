@@ -60,7 +60,6 @@ router.delete('/:id', [authMiddleware, adminMiddleware, validateObjectId],
       if (!document) return res.status(404).send("The Customer with the given ID was not found.")
       res.send(document)
     })
-    .catch(err => res.send(err.message))
 })
 
 
