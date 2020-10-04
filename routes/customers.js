@@ -1,9 +1,10 @@
 const { Customer, validate } = require('../models/customerModel')
 const asyncMiddleware = require('../middleware/async')
 const authMiddleware = require('../middleware/authMiddleware')
-const express = require("express");
+const adminMiddleware = require('../middleware/adminMiddleware')
 const validateMiddleware = require('../middleware/validateMiddleware');
 const validateObjectId = require('../middleware/validateObjectId')
+const express = require("express");
 const router = express.Router();
 
 
@@ -52,7 +53,8 @@ router.get('/:id', validateObjectId, (req, res) => {
     })
 })
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', [authMiddleware, adminMiddleware, validateObjectId], 
+(req, res) => {
   Customer.findByIdAndDelete(req.params.id)
     .then(document => {
       if (!document) return res.status(404).send("The Customer with the given ID was not found.")
