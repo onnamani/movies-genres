@@ -150,4 +150,21 @@ describe('/api/customers', () => {
       expect(res.body).toHaveProperty('isGold', true)
     });
   });
+
+  describe('Delete /:id', () => {
+    it('should return 404 if customer with given id is not found', async () => {
+      const user = new User({
+        _id: mongoose.Types.ObjectId(),
+        isAdmin: true
+      })
+      const token = user.generateAuthToken()
+      const customerId = mongoose.Types.ObjectId().toHexString()
+
+      const res = await request(server)
+        .delete('/api/customers/' + customerId)
+        .set('x-auth-token', token)
+      
+      expect(res.status).toBe(404)
+    })
+  })
 })
