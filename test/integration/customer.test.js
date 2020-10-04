@@ -132,5 +132,22 @@ describe('/api/customers', () => {
 
       expect(res.status).toBe(404);
     });
+
+    it("should return an updated customer", async () => {
+      const token = new User().generateAuthToken();
+      const customer = new Customer({
+        name: "Obinna Nnamani",
+        phone: "0817000000"
+      })
+      await customer.save()
+
+      const res = await request(server)
+        .put("/api/customers/" + customer._id)
+        .set("x-auth-token", token)
+        .send({ name: "Obinna", phone: "0807000000", isGold: true });
+
+      expect(res.status).toBe(200)
+      expect(res.body).toHaveProperty('isGold', true)
+    });
   });
 })
